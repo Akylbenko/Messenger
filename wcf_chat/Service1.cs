@@ -56,3 +56,4 @@ namespace wcf_chat
         }
     }
 }
+
