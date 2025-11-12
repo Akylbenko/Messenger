@@ -16,5 +16,25 @@ namespace ChatClient
         {
             InitializeComponent();
         }
+
+        private void textBoxMessage_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void buttonConnect_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonDisConnect_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonSend_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
