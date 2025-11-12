@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ServiceModel;
 
-namespace wcf_chat
+namespace ChatService
 {
     internal class ServerUser
     {

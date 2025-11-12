@@ -6,7 +6,8 @@ using System.ServiceModel;
 using System.ServiceModel.Security.Tokens;
 using System.Text;
 
-namespace wcf_chat
+namespace ChatService
+
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]   
     
@@ -30,7 +31,7 @@ namespace wcf_chat
 
         public void Disonnect(int id)
         {
-            var user = users.FirstOrDefault(i=i => i.Id == id);
+            var user = users.FirstOrDefault(i => i.Id == id);
             if (user != null)
             {
                 users.Remove(user);
@@ -43,7 +44,7 @@ namespace wcf_chat
             foreach (var item in users)
             {
                 string answer = DateTime.Now.ToShortTimeString();
-                var user = users.FirstOrDefault(i = i => i.Id == id);
+                var user = users.FirstOrDefault(i => i.Id == id);
                 if (user != null)
                 {
                     answer += ": " + user.Name + "";
