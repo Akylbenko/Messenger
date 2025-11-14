@@ -24,7 +24,7 @@ namespace ChatService
                 OperationContext = OperationContext.Current
             };
             nextId++;
-            SendMessage(user.Name + "подключился к чату!", 0);
+            SendMessage(user.Name + " подключился к чату!", 0);
             users.Add(user);
             return user.Id;
         }
@@ -35,7 +35,7 @@ namespace ChatService
             if (user != null)
             {
                 users.Remove(user);
-                SendMessage(user.Name + "покинул чат!", 0);
+                SendMessage(user.Name + " покинул чат!", 0);
             }
         }
 

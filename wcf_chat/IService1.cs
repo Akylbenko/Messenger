@@ -7,7 +7,6 @@ using System.Text;
 
 namespace ChatService
 {
-    // ПРИМЕЧАНИЕ. Можно использовать команду "Переименовать" в меню "Рефакторинг", чтобы изменить имя интерфейса "IService1" в коде и файле конфигурации.
     [ServiceContract(CallbackContract = typeof(Iservice1Callback))]
     public interface IService1
     {
