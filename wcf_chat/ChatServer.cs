@@ -13,6 +13,7 @@ namespace ChatService
         private List<ServerUser> _users = new List<ServerUser>();
         private int _nextId = 1;
         private bool _isRunning;
+        private object _usersLock = new object(); 
 
         public void Start()
         {
@@ -42,11 +43,14 @@ namespace ChatService
             _isRunning = false;
             _listener?.Stop();
 
-            foreach (var user in _users)
+            lock (_usersLock)
             {
-                user.Client?.Close();
+                foreach (var user in _users)
+                {
+                    user.Client?.Close();
+                }
+                _users.Clear();
             }
-            _users.Clear();
         }
 
         private void HandleClient(object clientObj)
@@ -69,11 +73,14 @@ namespace ChatService
                     Stream = stream
                 };
 
-                _users.Add(user);
+                lock (_usersLock)
+                {
+                    _users.Add(user);
+                }
 
                 Message connectMessage = new Message("Система", $"{user.Name} подключился!");
                 BroadcastMessage(connectMessage);
-                UpdateUsersList();
+                UpdateUsersList(); 
 
                 Console.WriteLine($"Пользователь {user.Name} подключился (ID: {user.Id})");
 
@@ -107,10 +114,14 @@ namespace ChatService
             {
                 if (user != null)
                 {
-                    _users.Remove(user);
+                    lock (_usersLock)
+                    {
+                        _users.Remove(user);
+                    }
+
                     Message disconnectMessage = new Message("Система", $"{user.Name} отключился!");
                     BroadcastMessage(disconnectMessage);
-                    UpdateUsersList();
+                    UpdateUsersList(); 
                     Console.WriteLine($"Пользователь {user.Name} отключился");
                 }
 
@@ -120,54 +131,70 @@ namespace ChatService
 
         private void BroadcastMessage(Message message)
         {
-            string messageData = message.Serialize();
+            
+            string messageData = message.Serialize() + "\n"; 
             byte[] data = Encoding.UTF8.GetBytes(messageData);
 
             List<ServerUser> disconnectedUsers = new List<ServerUser>();
 
-            foreach (var user in _users)
+            lock (_usersLock)
             {
-                try
+                foreach (var user in _users)
                 {
-                    if (user.Client.Connected)
+                    try
                     {
-                        user.Stream.Write(data, 0, data.Length);
+                        if (user.Client.Connected)
+                        {
+                            user.Stream.Write(data, 0, data.Length);
+                        }
+                        else
+                        {
+                            disconnectedUsers.Add(user);
+                        }
                     }
-                    else
+                    catch
                     {
                         disconnectedUsers.Add(user);
                     }
                 }
-                catch
-                {
-                    disconnectedUsers.Add(user);
-                }
-            }
 
-            foreach (var disconnectedUser in disconnectedUsers)
-            {
-                _users.Remove(disconnectedUser);
+                foreach (var disconnectedUser in disconnectedUsers)
+                {
+                    _users.Remove(disconnectedUser);
+                }
             }
         }
 
         private void UpdateUsersList()
         {
-            string usersList = "USERS_LIST:" + string.Join(",", _users.ConvertAll(u => u.Name));
+            string usersList = "USERS_LIST:" + string.Join(",", _users.ConvertAll(u => u.Name)) + "\n";
             byte[] data = Encoding.UTF8.GetBytes(usersList);
 
-            foreach (var user in _users)
+            lock (_usersLock)
             {
-                try
+                usersList = "USERS_LIST:" + string.Join(",", _users.ConvertAll(u => u.Name));
+            }
+
+            
+
+            lock (_usersLock)
+            {
+                foreach (var user in _users)
                 {
-                    if (user.Client.Connected)
+                    try
                     {
-                        user.Stream.Write(data, 0, data.Length);
+                        if (user.Client.Connected)
+                        {
+                            user.Stream.Write(data, 0, data.Length);
+                        }
+                    }
+                    catch
+                    {
                     }
                 }
-                catch
-                {
-                }
             }
+
+            Console.WriteLine($"Список пользователей обновлен: {usersList}");
         }
     }
 }

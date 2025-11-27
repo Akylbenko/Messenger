@@ -34,6 +34,8 @@ namespace ChatClient
                 return;
             }
 
+
+
             try
             {
                 _client = new TcpClient();
@@ -80,6 +82,8 @@ namespace ChatClient
             listBoxChat.Items.Add("Вы отключились.");
             buttonConnect.Enabled = true;
             buttonDisConnect.Enabled = false;
+
+            listBoxUsers.Items.Clear();
         }
 
         private void SendMessage()
@@ -92,7 +96,7 @@ namespace ChatClient
             try
             {
                 Message message = new Message(textBoxUsername.Text, messageText);
-                string messageData = message.Serialize(); 
+                string messageData = message.Serialize();
                 byte[] data = Encoding.UTF8.GetBytes(messageData);
                 _stream.Write(data, 0, data.Length);
                 textBoxMessage.Clear();
@@ -106,6 +110,7 @@ namespace ChatClient
         private void ReceiveMessages()
         {
             byte[] buffer = new byte[1024];
+            string leftover = "";
 
             while (_connected)
             {
@@ -114,29 +119,45 @@ namespace ChatClient
                     int bytesRead = _stream.Read(buffer, 0, buffer.Length);
                     if (bytesRead == 0) break;
 
-                    string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    string receivedData = leftover + Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    leftover = "";
 
-                    if (receivedData.StartsWith("USERS_LIST:"))
+                    string[] messages = receivedData.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (receivedData.EndsWith("\n") == false && messages.Length > 0)
                     {
-                        string usersList = receivedData.Substring(11);
-                        UpdateUsersList(usersList);
+                        leftover = messages[messages.Length - 1];
+                        Array.Resize(ref messages, messages.Length - 1);
                     }
-                    else
+
+                    foreach (string message in messages)
                     {
-                        try
+                        if (string.IsNullOrWhiteSpace(message)) continue;
+
+                        if (message.StartsWith("USERS_LIST:"))
                         {
-                            Message message = Message.Deserialize(receivedData);
-                            Invoke((MethodInvoker)delegate
-                            {
-                                listBoxChat.Items.Add(message.ToString());
-                            });
+                            string usersList = message.Substring(11); 
+                            UpdateUsersList(usersList);
                         }
-                        catch
+                        else
                         {
-                            Invoke((MethodInvoker)delegate
+                            try
                             {
-                                listBoxChat.Items.Add(receivedData);
-                            });
+                                Message chatMessage = Message.Deserialize(message.Trim());
+                                Invoke((MethodInvoker)delegate
+                                {
+                                    listBoxChat.Items.Add(chatMessage.ToString());
+                                });
+                            }
+                            catch
+                            {
+                                if (!string.IsNullOrWhiteSpace(message))
+                                {
+                                    Invoke((MethodInvoker)delegate
+                                    {
+                                        listBoxChat.Items.Add(message.Trim());
+                                    });
+                                }
+                            }
                         }
                     }
                 }
@@ -168,6 +189,7 @@ namespace ChatClient
                         listBoxUsers.Items.Add(user);
                     }
                 }
+
             });
         }
 
