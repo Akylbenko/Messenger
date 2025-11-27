@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.Reflection.Emit;
 using System.Windows.Forms;
 
 namespace ChatClient
@@ -16,12 +15,12 @@ namespace ChatClient
         private Button buttonConnect;
         private Button buttonDisConnect;
         private Button buttonSend;
-        private System.Windows.Forms.Label labelIp;
-        private System.Windows.Forms.Label labelPort;
-        private System.Windows.Forms.Label labelUsername;
-        private System.Windows.Forms.Label labelChat;
-        private System.Windows.Forms.Label labelUsers;
-        private System.Windows.Forms.Label labelMessage;
+        private Label labelIp;
+        private Label labelPort;
+        private Label labelUsername;
+        private Label labelChat;
+        private Label labelUsers;
+        private Label labelMessage;
 
         protected override void Dispose(bool disposing)
         {
@@ -31,6 +30,7 @@ namespace ChatClient
             }
             base.Dispose(disposing);
         }
+
         private void InitializeComponent()
         {
             textBoxMessage = new TextBox();
@@ -42,12 +42,12 @@ namespace ChatClient
             buttonConnect = new Button();
             buttonDisConnect = new Button();
             buttonSend = new Button();
-            labelIp = new System.Windows.Forms.Label();
-            labelPort = new System.Windows.Forms.Label();
-            labelUsername = new System.Windows.Forms.Label();
-            labelChat = new System.Windows.Forms.Label();
-            labelUsers = new System.Windows.Forms.Label();
-            labelMessage = new System.Windows.Forms.Label();
+            labelIp = new Label();
+            labelPort = new Label();
+            labelUsername = new Label();
+            labelChat = new Label();
+            labelUsers = new Label();
+            labelMessage = new Label();
 
             textBoxMessage.Location = new Point(12, 245);
             textBoxMessage.Size = new Size(329, 20);
@@ -76,7 +76,7 @@ namespace ChatClient
             buttonDisConnect.Location = new Point(151, 312);
             buttonDisConnect.Size = new Size(85, 23);
             buttonDisConnect.Text = "Отключиться";
-            buttonDisConnect.Click += buttonDisConnect_Click;
+            buttonDisConnect.Click += buttonDisconnect_Click;
 
             buttonSend.Location = new Point(345, 245);
             buttonSend.Size = new Size(85, 23);
@@ -112,13 +112,11 @@ namespace ChatClient
             labelUsername.Text = "Имя:";
 
             Controls.AddRange(new Control[] {
-                textBoxMessage, textBoxIp, textBoxPort, textBoxUsername, listBoxChat, listBoxUsers, 
+                textBoxMessage, textBoxIp, textBoxPort, textBoxUsername, listBoxChat, listBoxUsers,
                 buttonConnect, buttonDisConnect, buttonSend,labelChat, labelIp, labelPort, labelUsername, labelUsers, labelMessage
             });
 
             this.Size = new Size(700, 450);
         }
-
     }
 }
-
